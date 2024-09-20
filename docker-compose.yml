@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: snippet_permission_db
+    ports:
+      - "5434:5432"
