@@ -1,4 +1,4 @@
-package ingsis.snippet_permission
+package ingsis.permission
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
@@ -7,5 +7,5 @@ import org.springframework.boot.runApplication
 class SnippetPermissionApplication
 
 fun main(args: Array<String>) {
-	runApplication<SnippetPermissionApplication>(*args)
+    runApplication<SnippetPermissionApplication>(*args)
 }
