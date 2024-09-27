@@ -20,13 +20,12 @@ data class Permission(
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     val id: String = UUID.randomUUID().toString(),
-    val authorId: String= "1",
-    val snippetId: String= "1",
+    val authorId: String = "1",
+    val snippetId: String = "1",
     @CreationTimestamp
     val createdAt: LocalDateTime = LocalDateTime.now(),
     @UpdateTimestamp
     var updatedAt: LocalDateTime = LocalDateTime.now(),
-
     @ElementCollection(targetClass = PermissionTypeEnum::class)
     @CollectionTable(name = "permission_types", joinColumns = [JoinColumn(name = "permission_id")])
     @Enumerated(EnumType.STRING)

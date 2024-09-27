@@ -6,9 +6,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class PermissionService
-    @Autowired constructor (
-    private val repository: PermissionRepository
-    ) {
-
-
-}
+    @Autowired
+    constructor(
+        private val repository: PermissionRepository,
+    )

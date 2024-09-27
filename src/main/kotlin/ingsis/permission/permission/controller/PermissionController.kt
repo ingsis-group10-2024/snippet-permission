@@ -6,8 +6,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 class PermissionController
-    @Autowired constructor (
-    private val service: PermissionService
-    ) {
-
-}
+    @Autowired
+    constructor(
+        private val service: PermissionService,
+    )

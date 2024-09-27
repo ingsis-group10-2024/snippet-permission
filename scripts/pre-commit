@@ -3,5 +3,6 @@
 set -e.
 
 echo "***** Running pre-commit ******"
+./gradlew ktlintFormat
 ./gradlew build
 echo "***** Done with pre-commit ******"

@@ -4,5 +4,5 @@ enum class PermissionTypeEnum {
     READ,
     WRITE,
     EXECUTE,
-    SHARE
+    SHARE,
 }
