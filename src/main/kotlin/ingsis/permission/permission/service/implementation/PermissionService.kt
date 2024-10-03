@@ -15,11 +15,11 @@ class PermissionService
     constructor(
         private val repository: PermissionRepository,
     ) : PermissionService {
-        fun createPermission(input: CreatePermission) {
+        fun createPermission(input: CreatePermission): Permission {
             val type = getPermissionType(input.permissionType)
             val existingPermission = findPermission(input.userId, input.snippetId)
 
-            if (existingPermission != null) {
+            return if (existingPermission != null) {
                 updatePermission(existingPermission, type)
             } else {
                 repository.save(
@@ -77,12 +77,13 @@ class PermissionService
         private fun updatePermission(
             existingPermission: Permission,
             newType: PermissionTypeEnum,
-        ) {
+        ): Permission {
             if (!existingPermission.permissions.contains(newType)) {
                 val updatedPermissions = existingPermission.permissions + newType
                 // copy is used to create a new instance of the object
                 val updatedPermission = existingPermission.copy(permissions = updatedPermissions)
-                repository.save(updatedPermission)
+                return repository.save(updatedPermission)
             }
+            return repository.save(existingPermission)
         }
     }
