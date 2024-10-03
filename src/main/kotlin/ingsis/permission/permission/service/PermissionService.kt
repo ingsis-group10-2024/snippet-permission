@@ -1,12 +1,25 @@
 package ingsis.permission.permission.service
 
-import ingsis.permission.permission.persistance.repository.PermissionRepository
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Service
+import ingsis.permission.permission.model.enums.PermissionTypeEnum
+import ingsis.permission.permission.persistance.entity.Permission
 
-@Service
-class PermissionService
-    @Autowired
-    constructor(
-        private val repository: PermissionRepository,
-    )
+interface PermissionService {
+    fun getUserPermission(
+        snippetId: String,
+        userId: String,
+    ): Permission
+
+    fun shareSnippet(
+        snippetId: String,
+        userId: String,
+        targetUserId: String,
+    ): Boolean
+
+    fun getOwnerBySnippetId(snippetId: String): String
+
+    fun addPermission(
+        snippetId: String,
+        userId: String,
+        permissionTypeEnum: PermissionTypeEnum,
+    ): Boolean
+}
