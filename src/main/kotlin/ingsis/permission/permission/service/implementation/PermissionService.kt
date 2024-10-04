@@ -32,6 +32,14 @@ class PermissionService
             }
         }
 
+        fun getPermissions(
+            userId: String,
+            snippetId: String,
+        ): List<PermissionTypeEnum> {
+            val permission = findPermission(userId, snippetId)
+            return permission?.permissions ?: emptyList()
+        }
+
         override fun getUserPermission(
             snippetId: String,
             userId: String,
