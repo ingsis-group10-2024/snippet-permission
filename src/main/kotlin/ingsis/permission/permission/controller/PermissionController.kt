@@ -29,10 +29,8 @@ class PermissionController
                 val createdPermission = service.createPermission(input)
                 ResponseEntity.status(HttpStatus.CREATED).body(createdPermission)
             } catch (e: InvalidPermissionType) {
-                // Manejo específico para InvalidPermissionTypeException
                 ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null)
             } catch (e: Exception) {
-                // Manejo general para otros errores
                 ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null)
             }
         }
