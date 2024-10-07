@@ -20,7 +20,7 @@ data class Permission(
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     val id: String = UUID.randomUUID().toString(),
-    val authorId: String = "1",
+    val userId: String = "1",
     val snippetId: String = "1",
     @CreationTimestamp
     val createdAt: LocalDateTime = LocalDateTime.now(),
