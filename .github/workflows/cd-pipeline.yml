@@ -36,3 +36,5 @@ jobs:
         with:
           push: true
           tags: ${{secrets.DOCKER_USERNAME}}/snippet-permission:latest
+          # ${{secrets.DOCKER_USERNAME}}/snippet-permission:${{ steps.short-sha.outputs.sha }}
+          # para usar la como tag de la imagen el sha del commit
