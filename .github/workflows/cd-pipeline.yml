@@ -35,6 +35,4 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           push: true
-          tags: |
-          # ${{secrets.DOCKER_USERNAME}}/snippet-permission:${{ steps.short-sha.outputs.sha }}
-            ${{secrets.DOCKER_USERNAME}}/snippet-permission:latest
+          tags: ${{secrets.DOCKER_USERNAME}}/snippet-permission:latest
