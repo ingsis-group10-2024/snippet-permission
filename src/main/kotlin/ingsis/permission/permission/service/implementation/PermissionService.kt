@@ -7,14 +7,28 @@ import ingsis.permission.permission.persistance.entity.Permission
 import ingsis.permission.permission.persistance.repository.PermissionRepository
 import ingsis.permission.permission.service.PermissionService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
+import org.springframework.http.MediaType
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
+import org.springframework.security.oauth2.jwt.Jwt
+import org.springframework.web.client.RestTemplate
+
 
 @Service
 class PermissionService
     @Autowired
     constructor(
         private val repository: PermissionRepository,
+        private val restTemplate: RestTemplate,
     ) : PermissionService {
+
+        // URL of the services
+        private val snippetManagerUrl = "http://snippet-manager:8080/snippets/user"
+        private val snippetRunnerUrl = "http://snippet-runner:8080/linting/status"
+
         fun createPermission(input: CreatePermission): Permission {
             val type = getPermissionType(input.permissionType)
             val existingPermission = findPermission(input.userId, input.snippetId)
@@ -94,4 +108,39 @@ class PermissionService
             }
             return repository.save(existingPermission)
         }
+
+
+        // Extract the JWT token from the authentication object
+        private fun getJwtToken(): String {
+            val authentication = SecurityContextHolder.getContext().authentication
+            val jwt = authentication.principal as Jwt
+            println("JWT Token: ${jwt.tokenValue}") // DEBUG
+            return jwt.tokenValue
+        }
+
+
+    fun listUserSnippets(userId: String, page: Int, pageSize: Int): PaginatedSnippetResponse {
+        // Create headers with the JWT token
+        val headers = HttpHeaders().apply {
+            contentType = MediaType.APPLICATION_JSON
+            setBearerAuth(getJwtToken())
+        }
+
+        // Configure the request
+        val params = mapOf(
+            "userId" to userId,
+            "page" to page.toString(),
+            "pageSize" to pageSize.toString()
+        )
+
+        // Call the snippets service
+        val entity = HttpEntity(null, headers)
+        val paginatedSnippets = restTemplate.exchange(
+            "$snippetManagerUrl?userId={userId}&page={page}&pageSize={pageSize}",
+            HttpMethod.GET,
+            entity,
+            PaginatedSnippetResponse::class.java,
+            params
+        ).body!!
     }
+}

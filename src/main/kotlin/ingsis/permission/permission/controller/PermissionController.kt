@@ -9,10 +9,7 @@ import ingsis.permission.permission.service.implementation.PermissionService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/permission")
@@ -55,4 +52,14 @@ class PermissionController
         //    }
         // }
         // }
+
+        @GetMapping("/snippets")
+        fun listUserSnippets(
+            @RequestParam userId: String,
+            @RequestParam page: Int,
+            @RequestParam pageSize: Int
+            ): ResponseEntity<PaginatedSnippetResponse> {
+                val snippets = service.listUserSnippets(userId, page, pageSize)
+                return ResponseEntity.ok(snippets)
+            }
     }
