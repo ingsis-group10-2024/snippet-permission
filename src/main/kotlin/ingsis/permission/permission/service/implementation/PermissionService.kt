@@ -146,6 +146,6 @@ class PermissionService
                     params,
                 ).body!!
 
-            return response   // Hacer casting a PaginatedResponse<Snippet>
+            return response // Hacer casting a PaginatedResponse<Snippet>
         }
-}
+    }
