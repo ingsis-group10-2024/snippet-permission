@@ -2,6 +2,7 @@ package ingsis.permission.permission.controller
 
 import ingsis.permission.permission.exception.InvalidPermissionType
 import ingsis.permission.permission.model.dto.CreatePermission
+import ingsis.permission.permission.model.dto.PaginatedSnippetResponse
 import ingsis.permission.permission.model.dto.PermissionRequest
 import ingsis.permission.permission.model.enums.PermissionTypeEnum
 import ingsis.permission.permission.persistance.entity.Permission
@@ -9,6 +10,7 @@ import ingsis.permission.permission.service.implementation.PermissionService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -40,26 +42,14 @@ class PermissionController
             return ResponseEntity.ok(permissions)
         }
 
-        // @GetMapping("/permissions")
-        // fun getPermissions(
-        //    @RequestBody request: PermissionRequest // Usar el DTO aquí
-        // ): ResponseEntity<List<PermissionTypeEnum>> {
-        //    return try {
-        //        val permissions = service.getPermissions(request.userId, request.snippetId)
-        //        ResponseEntity.ok(permissions)
-        //    } catch (e: Exception) {
-        //        ResponseEntity.notFound().build()
-        //    }
-        // }
-        // }
-
+        @PreAuthorize("hasAuthority('SCOPE_read:snippet')")
         @GetMapping("/snippets")
         fun listUserSnippets(
             @RequestParam userId: String,
             @RequestParam page: Int,
-            @RequestParam pageSize: Int
-            ): ResponseEntity<PaginatedSnippetResponse> {
-                val snippets = service.listUserSnippets(userId, page, pageSize)
-                return ResponseEntity.ok(snippets)
-            }
+            @RequestParam pageSize: Int,
+        ): ResponseEntity<PaginatedSnippetResponse> {
+            val snippets = service.listUserSnippets(userId, page, pageSize)
+            return ResponseEntity.ok(snippets)
+        }
     }
