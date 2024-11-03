@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
+import java.security.Principal
 
 @RestController
 @RequestMapping("/permission")
@@ -45,11 +46,12 @@ class PermissionController
         @PreAuthorize("hasAuthority('SCOPE_read:snippet')")
         @GetMapping("/snippets")
         fun listUserSnippets(
-            @RequestParam userId: String,
+            principal: Principal,
             @RequestParam page: Int,
             @RequestParam pageSize: Int,
-        ): ResponseEntity<PaginatedSnippetResponse> {
-            val snippets = service.listUserSnippets(userId, page, pageSize)
+            @RequestHeader("Authorization") authorizationHeader: String,
+            ): ResponseEntity<PaginatedSnippetResponse> {
+            val snippets = service.listUserSnippets(principal.name, page, pageSize, authorizationHeader)
             return ResponseEntity.ok(snippets)
         }
     }

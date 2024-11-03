@@ -12,10 +12,14 @@ import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.stereotype.Service
+import org.springframework.util.LinkedMultiValueMap
+import org.springframework.util.MultiValueMap
 import org.springframework.web.client.RestTemplate
+import org.springframework.web.client.exchange
 
 @Service
 class PermissionService
@@ -24,8 +28,6 @@ class PermissionService
         private val repository: PermissionRepository,
         private val restTemplate: RestTemplate,
     ) : PermissionService {
-        // URL of the services
-        private val snippetManagerUrl = "http://manager:8080/snippets/user"
 
         fun createPermission(input: CreatePermission): Permission {
             val type = getPermissionType(input.permissionType)
@@ -107,45 +109,35 @@ class PermissionService
             return repository.save(existingPermission)
         }
 
-        // Extract the JWT token from the authentication object
-        private fun getJwtToken(): String {
-            val authentication = SecurityContextHolder.getContext().authentication
-            val jwt = authentication.principal as Jwt
-            println("JWT Token: ${jwt.tokenValue}") // DEBUG
-            return jwt.tokenValue
-        }
-
         fun listUserSnippets(
             userId: String,
             page: Int,
             pageSize: Int,
+            authorizationHeader: String,
         ): PaginatedSnippetResponse {
-            // Create headers with the JWT token
-            val headers =
-                HttpHeaders().apply {
-                    contentType = MediaType.APPLICATION_JSON
-                    setBearerAuth(getJwtToken())
-                }
 
-            // Configure the request
-            val params =
-                mapOf(
-                    "userId" to userId,
-                    "page" to page.toString(),
-                    "pageSize" to pageSize.toString(),
-                )
+            val headers: MultiValueMap<String, String> = LinkedMultiValueMap()
+            headers.add("Authorization", authorizationHeader)
+            headers.add("Content-Type", "application/json")
 
-            // Call the snippets service
-            val entity = HttpEntity(null, headers)
-            val response =
+            val requestEntity = HttpEntity(null, headers)
+
+            val url = "http://snippet-manager:8080/manager/snippet?userId={userId}&page={page}&pageSize={pageSize}"
+            val params = mapOf(
+                "userId" to userId,
+                "page" to page.toString(),
+                "pageSize" to pageSize.toString()
+            )
+
+            val response: ResponseEntity<PaginatedSnippetResponse> =
                 restTemplate.exchange(
-                    "$snippetManagerUrl?userId={userId}&page={page}&pageSize={pageSize}",
+                    url,
                     HttpMethod.GET,
-                    entity,
+                    requestEntity,
                     PaginatedSnippetResponse::class.java,
                     params,
-                ).body!!
+                )
 
-            return response // Hacer casting a PaginatedResponse<Snippet>
+            return response.body ?: throw RuntimeException("No response from snippet-manager")
         }
     }
