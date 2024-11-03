@@ -22,10 +22,23 @@ java {
 }
 
 repositories {
-	mavenCentral()
+    mavenLocal()
+    mavenCentral()
+    maven {
+        name = "GitHubPackages"
+        url = uri("https://maven.pkg.github.com/ingsis-group10-2024/printscript")
+        credentials {
+            username = project.findProperty("gpr.user") ?: System.getenv("GITHUB_ACTOR")
+            password = project.findProperty("gpr.token") ?: System.getenv("GITHUB_TOKEN")
+        }
+    }
 }
 
 dependencies {
+
+    implementation 'printscript:sca:2.1.10-SNAPSHOT'
+    implementation 'printscript:common:2.1.10-SNAPSHOT'
+
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
@@ -37,6 +50,9 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.jetbrains.kotlin:kotlin-test-junit5'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    implementation 'com.okta.spring:okta-spring-boot-starter:3.0.5'
+    implementation("org.springframework.boot:spring-boot-starter-security")
 }
 
 kotlin {
