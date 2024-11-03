@@ -9,12 +9,8 @@ import ingsis.permission.permission.persistance.repository.PermissionRepository
 import ingsis.permission.permission.service.PermissionService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
-import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
-import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.stereotype.Service
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
@@ -28,7 +24,6 @@ class PermissionService
         private val repository: PermissionRepository,
         private val restTemplate: RestTemplate,
     ) : PermissionService {
-
         fun createPermission(input: CreatePermission): Permission {
             val type = getPermissionType(input.permissionType)
             val existingPermission = findPermission(input.userId, input.snippetId)
@@ -115,7 +110,6 @@ class PermissionService
             pageSize: Int,
             authorizationHeader: String,
         ): PaginatedSnippetResponse {
-
             val headers: MultiValueMap<String, String> = LinkedMultiValueMap()
             headers.add("Authorization", authorizationHeader)
             headers.add("Content-Type", "application/json")
@@ -123,11 +117,12 @@ class PermissionService
             val requestEntity = HttpEntity(null, headers)
 
             val url = "http://snippet-manager:8080/manager/snippet?userId={userId}&page={page}&pageSize={pageSize}"
-            val params = mapOf(
-                "userId" to userId,
-                "page" to page.toString(),
-                "pageSize" to pageSize.toString()
-            )
+            val params =
+                mapOf(
+                    "userId" to userId,
+                    "page" to page.toString(),
+                    "pageSize" to pageSize.toString(),
+                )
 
             val response: ResponseEntity<PaginatedSnippetResponse> =
                 restTemplate.exchange(

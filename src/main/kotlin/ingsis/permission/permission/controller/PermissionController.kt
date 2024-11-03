@@ -50,7 +50,7 @@ class PermissionController
             @RequestParam page: Int,
             @RequestParam pageSize: Int,
             @RequestHeader("Authorization") authorizationHeader: String,
-            ): ResponseEntity<PaginatedSnippetResponse> {
+        ): ResponseEntity<PaginatedSnippetResponse> {
             val snippets = service.listUserSnippets(principal.name, page, pageSize, authorizationHeader)
             return ResponseEntity.ok(snippets)
         }
