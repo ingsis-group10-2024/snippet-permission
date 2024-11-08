@@ -1,15 +1,25 @@
 package ingsis.permission.permission.controller
 
 import ingsis.permission.permission.exception.InvalidPermissionType
-import ingsis.permission.permission.model.dto.*
+import ingsis.permission.permission.model.dto.CreatePermission
+import ingsis.permission.permission.model.dto.PaginatedSnippetResponse
+import ingsis.permission.permission.model.dto.PermissionRequest
+import ingsis.permission.permission.model.dto.ShareSnippetRequest
+import ingsis.permission.permission.model.dto.SnippetDescriptor
 import ingsis.permission.permission.model.enums.PermissionTypeEnum
-import ingsis.permission.permission.persistance.entity.Permission
 import ingsis.permission.permission.service.implementation.PermissionService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestHeader
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RestController
 import java.security.Principal
 
 @RestController
@@ -24,7 +34,8 @@ class PermissionController
             @RequestBody input: CreatePermission,
         ): ResponseEntity<String> {
             return try {
-                service.createPermission(input)
+                val permission = service.createPermission(input)
+                println("Permission created successfully: $permission")
                 ResponseEntity.status(HttpStatus.CREATED).body("Permission created successfully")
             } catch (e: InvalidPermissionType) {
                 ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid permission type")
@@ -49,7 +60,13 @@ class PermissionController
             @RequestParam pageSize: Int,
             @RequestHeader("Authorization") authorizationHeader: String,
         ): ResponseEntity<PaginatedSnippetResponse> {
-            val snippets = service.listUserSnippets(principal.name, page, pageSize, authorizationHeader)
+            val snippets =
+                service.listUserSnippets(
+                    userId = principal.name,
+                    page = page,
+                    pageSize = pageSize,
+                    authorizationHeader = authorizationHeader,
+                )
             return ResponseEntity.ok(snippets)
         }
 
@@ -59,9 +76,15 @@ class PermissionController
             @RequestBody request: ShareSnippetRequest,
             principal: Principal,
             @RequestHeader("Authorization") authorizationHeader: String,
-            ): ResponseEntity<SnippetDescriptor> {
+        ): ResponseEntity<SnippetDescriptor> {
             return try {
-                val sharedSnippet = service.shareSnippet(snippetId, principal.name,authorizationHeader, request.userId)
+                val sharedSnippet =
+                    service.shareSnippet(
+                        snippetId = snippetId,
+                        userId = principal.name,
+                        authorizationHeader = authorizationHeader,
+                        targetUserId = request.targetUserId,
+                    )
                 ResponseEntity.status(HttpStatus.OK).body(sharedSnippet)
             } catch (e: Exception) {
                 ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null)
