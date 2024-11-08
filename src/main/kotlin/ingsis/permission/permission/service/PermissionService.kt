@@ -1,5 +1,6 @@
 package ingsis.permission.permission.service
 
+import ingsis.permission.permission.model.dto.SnippetDescriptor
 import ingsis.permission.permission.model.enums.PermissionTypeEnum
 import ingsis.permission.permission.persistance.entity.Permission
 
@@ -12,8 +13,9 @@ interface PermissionService {
     fun shareSnippet(
         snippetId: String,
         userId: String,
+        authorizationHeader: String,
         targetUserId: String,
-    ): Boolean
+    ): SnippetDescriptor
 
     fun getOwnerBySnippetId(snippetId: String): String
 

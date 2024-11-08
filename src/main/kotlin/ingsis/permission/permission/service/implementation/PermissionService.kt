@@ -3,6 +3,7 @@ package ingsis.permission.permission.service.implementation
 import ingsis.permission.permission.exception.InvalidPermissionType
 import ingsis.permission.permission.model.dto.CreatePermission
 import ingsis.permission.permission.model.dto.PaginatedSnippetResponse
+import ingsis.permission.permission.model.dto.SnippetDescriptor
 import ingsis.permission.permission.model.enums.PermissionTypeEnum
 import ingsis.permission.permission.persistance.entity.Permission
 import ingsis.permission.permission.persistance.repository.PermissionRepository
@@ -26,18 +27,20 @@ class PermissionService
     ) : PermissionService {
         fun createPermission(input: CreatePermission): Permission {
             val type = getPermissionType(input.permissionType)
+            println("Permission type: $type")
             val existingPermission = findPermission(input.userId, input.snippetId)
 
             return if (existingPermission != null) {
                 updatePermission(existingPermission, type)
             } else {
-                repository.save(
+                val permission =
                     Permission(
                         userId = input.userId,
                         snippetId = input.snippetId,
-                        permissions = listOf(type),
-                    ),
-                )
+                        permissions = listOf(type), // Lista de permisos
+                    )
+                println("Saving permission: $permission")
+                repository.save(permission)
             }
         }
 
@@ -46,6 +49,7 @@ class PermissionService
             snippetId: String,
         ): List<PermissionTypeEnum> {
             val permission = findPermission(userId, snippetId)
+            println("Retrieved permission for $userId and $snippetId: $permission")
             return permission?.permissions ?: emptyList()
         }
 
@@ -59,9 +63,54 @@ class PermissionService
         override fun shareSnippet(
             snippetId: String,
             userId: String,
+            authorizationHeader: String,
             targetUserId: String,
-        ): Boolean {
-            TODO("Not yet implemented")
+        ): SnippetDescriptor {
+            val snippet = getSnippet(snippetId, authorizationHeader) ?: throw Exception("Snippet not found")
+            println("Snippet: ${snippet.id}")
+
+            // Check if user has the OWNER permission
+            val userPermissions = getPermissions(userId, snippetId)
+            println("$userId has permissions: $userPermissions")
+            if (!userPermissions.contains(PermissionTypeEnum.OWNER)) {
+                throw InvalidPermissionType("User does not have ownership of the snippet.")
+            }
+
+            // Check if the target user (the friend) already has permissions
+            val existingPermission = findPermission(targetUserId, snippetId)
+            if (existingPermission == null) {
+                // If the target user does not have permissions, create READ permissions for the target user
+                createPermission(
+                    CreatePermission(
+                        snippetId = snippetId,
+                        userId = targetUserId,
+                        permissionType = PermissionTypeEnum.READ.name,
+                    ),
+                )
+            }
+            return snippet
+        }
+
+        private fun getSnippet(
+            snippetId: String,
+            authorizationHeader: String,
+        ): SnippetDescriptor? {
+            val url = "http://snippet-manager:8080/manager/snippet/get/$snippetId"
+
+            val headers: MultiValueMap<String, String> = LinkedMultiValueMap()
+            headers.add("Authorization", authorizationHeader)
+            headers.add("Content-Type", "application/json")
+
+            val requestEntity = HttpEntity(null, headers)
+
+            val response: ResponseEntity<SnippetDescriptor> =
+                restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    requestEntity,
+                    SnippetDescriptor::class.java,
+                )
+            return response.body
         }
 
         override fun getOwnerBySnippetId(snippetId: String): String {
@@ -88,6 +137,7 @@ class PermissionService
             userId: String,
             snippetId: String,
         ): Permission? {
+            println("Searching for permission with userId: $userId and snippetId: $snippetId")
             return repository.findByUserIdAndSnippetId(userId, snippetId)
         }
 
@@ -116,7 +166,7 @@ class PermissionService
 
             val requestEntity = HttpEntity(null, headers)
 
-            val url = "http://snippet-manager:8080/manager/snippet?userId={userId}&page={page}&pageSize={pageSize}"
+            val url = "http://snippet-manager:8080/manager/snippet/snippets?userId={userId}&page={page}&pageSize={pageSize}"
             val params =
                 mapOf(
                     "userId" to userId,
@@ -132,7 +182,6 @@ class PermissionService
                     PaginatedSnippetResponse::class.java,
                     params,
                 )
-
             return response.body ?: throw RuntimeException("No response from snippet-manager")
         }
     }

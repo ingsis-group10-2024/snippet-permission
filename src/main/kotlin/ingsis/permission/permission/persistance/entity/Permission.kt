@@ -2,6 +2,7 @@ package ingsis.permission.permission.persistance.entity
 
 import ingsis.permission.permission.model.enums.PermissionTypeEnum
 import jakarta.persistence.CollectionTable
+import jakarta.persistence.Column
 import jakarta.persistence.ElementCollection
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
@@ -20,7 +21,9 @@ data class Permission(
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     val id: String = UUID.randomUUID().toString(),
+    @Column(name = "user_id")
     val userId: String,
+    @Column(name = "snippet_id")
     val snippetId: String,
     @CreationTimestamp
     val createdAt: LocalDateTime = LocalDateTime.now(),
