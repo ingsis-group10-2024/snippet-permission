@@ -14,12 +14,14 @@ class TestCaseService
         private val permissionService: PermissionService,
         private val testCaseRepository: TestCaseRepository,
     ) {
-
-        fun createTestCase(testCaseDTO: TestCaseDTO, authorizationHeader: String): TestCaseEntity {
-
+        fun createTestCase(
+            testCaseDTO: TestCaseDTO,
+            authorizationHeader: String,
+        ): TestCaseEntity {
             // Check if snippet exists
-            val snippet = permissionService.getSnippet(testCaseDTO.id, authorizationHeader)
-                ?: throw SnippetNotFoundException("Snippet with ${testCaseDTO.id} not found")
+            val snippet =
+                permissionService.getSnippet(testCaseDTO.id, authorizationHeader)
+                    ?: throw SnippetNotFoundException("Snippet with ${testCaseDTO.id} not found")
 
             val testCaseEntity =
                 TestCaseEntity(

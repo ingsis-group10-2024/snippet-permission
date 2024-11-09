@@ -15,7 +15,7 @@ class TestCaseController(
     @PostMapping
     fun createTestCase(
         @RequestBody testCaseDTO: TestCaseDTO,
-        @RequestHeader("Authorization") authorizationHeader: String
+        @RequestHeader("Authorization") authorizationHeader: String,
     ): ResponseEntity<TestCaseDTO> {
         val createdTestCase = testCaseService.createTestCase(testCaseDTO = testCaseDTO, authorizationHeader = authorizationHeader)
         return ResponseEntity.status(HttpStatus.CREATED).body(createdTestCase.toDTO())
