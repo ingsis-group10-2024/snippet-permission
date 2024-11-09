@@ -20,6 +20,8 @@ data class TestCaseEntity(
     val id: String = UUID.randomUUID().toString(),
     @Column(nullable = false)
     val name: String,
+    @Column(name = "snippet_id")
+    val snippetId: String,
     @ElementCollection
     @CollectionTable(name = "test_case_inputs", joinColumns = [JoinColumn(name = "test_case_id")])
     @Column(name = "input_value")

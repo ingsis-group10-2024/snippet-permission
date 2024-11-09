@@ -5,7 +5,7 @@ import ingsis.permission.permission.persistance.entity.TestCaseEntity
 
 fun TestCaseEntity.toDTO() =
     TestCaseDTO(
-        id = this.id,
+        id = this.snippetId,
         name = this.name,
         input = this.input,
         output = this.output,

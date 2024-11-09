@@ -5,13 +5,7 @@ import ingsis.permission.permission.service.implementation.TestCaseService
 import ingsis.permission.permission.utils.toDTO
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/permission/testcases")
@@ -21,8 +15,9 @@ class TestCaseController(
     @PostMapping
     fun createTestCase(
         @RequestBody testCaseDTO: TestCaseDTO,
+        @RequestHeader("Authorization") authorizationHeader: String
     ): ResponseEntity<TestCaseDTO> {
-        val createdTestCase = testCaseService.createTestCase(testCaseDTO)
+        val createdTestCase = testCaseService.createTestCase(testCaseDTO = testCaseDTO, authorizationHeader = authorizationHeader)
         return ResponseEntity.status(HttpStatus.CREATED).body(createdTestCase.toDTO())
     }
 

@@ -90,7 +90,7 @@ class PermissionService
             return snippet
         }
 
-        private fun getSnippet(
+        fun getSnippet(
             snippetId: String,
             authorizationHeader: String,
         ): SnippetDescriptor? {
