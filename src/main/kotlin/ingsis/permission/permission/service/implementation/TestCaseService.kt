@@ -1,6 +1,5 @@
 package ingsis.permission.permission.service.implementation
 
-import ingsis.permission.SnippetPermissionApplication
 import ingsis.permission.permission.exception.SnippetNotFoundException
 import ingsis.permission.permission.model.dto.ExecutionResponse
 import ingsis.permission.permission.model.dto.SnippetRequest
@@ -10,6 +9,7 @@ import ingsis.permission.permission.persistance.entity.TestCaseEntity
 import ingsis.permission.permission.persistance.repository.TestCaseRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
+import org.springframework.http.HttpEntity
 import org.springframework.stereotype.Service
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
@@ -60,22 +60,25 @@ class TestCaseService
             val snippet = permissionService.getSnippet(testCaseDTO.id, authorizationHeader)
                 ?: throw SnippetNotFoundException("Snippet with ${testCaseDTO.id} not found")
 
-            // Create the request for the runner microservice
-            val snippetRequest = SnippetRequest(
-                name = snippet.name,
-                content = snippet.content,
-                language = snippet.language,
-                languageVersion = snippet.languageVersion
-            )
-            println("Executing test case for snippet: $snippetRequest")
+            val url = "http://snippet-runner:8080/runner/execute"
 
             val headers: MultiValueMap<String, String> = LinkedMultiValueMap()
             headers.add("Authorization", authorizationHeader)
             headers.add("Content-Type", "application/json")
 
+            // Create the SnippetRequest request for the runner microservice
+            val snippetRequest = SnippetRequest(
+                name = testCaseDTO.name,
+                content = testCaseDTO.input.joinToString("\n"),
+                language = snippet.language,
+                languageVersion = snippet.languageVersion
+            )
+            println("Executing test case: $snippetRequest")
+
+            val requestEntity = HttpEntity(snippetRequest, headers)
             val response = restTemplate.postForEntity(
-                "http://snippet-runner:8080/runner/execute",
-                snippetRequest,
+                url,
+                requestEntity,
                 ExecutionResponse::class.java
             )
 
