@@ -5,5 +5,5 @@ data class TestCaseResult(
     val success: Boolean,
     val actualOutput: List<String>,
     val expectedOutput: List<String>,
-    val message: String
+    val message: String,
 )

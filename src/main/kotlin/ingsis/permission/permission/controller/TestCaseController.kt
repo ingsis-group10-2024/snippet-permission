@@ -42,9 +42,8 @@ class TestCaseController(
     fun testSnippet(
         @RequestBody testCaseDTO: TestCaseDTO,
         @RequestHeader("Authorization") authorizationHeader: String,
-    ) : ResponseEntity<TestCaseResult> {
+    ): ResponseEntity<TestCaseResult> {
         return try {
-
             val result = testCaseService.executeTestCase(testCaseDTO, authorizationHeader)
 
             // Returns the result of the test case
