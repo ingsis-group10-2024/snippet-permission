@@ -1,9 +1,14 @@
 package ingsis.permission.permission.service.implementation
 
 import ingsis.permission.permission.exception.InvalidPermissionType
+import ingsis.permission.permission.exception.SnippetNotFoundException
 import ingsis.permission.permission.model.dto.CreatePermission
+import ingsis.permission.permission.model.dto.ExecutionResponse
 import ingsis.permission.permission.model.dto.PaginatedSnippetResponse
 import ingsis.permission.permission.model.dto.SnippetDescriptor
+import ingsis.permission.permission.model.dto.SnippetRequest
+import ingsis.permission.permission.model.dto.TestCaseDTO
+import ingsis.permission.permission.model.dto.TestCaseResult
 import ingsis.permission.permission.model.enums.PermissionTypeEnum
 import ingsis.permission.permission.persistance.entity.Permission
 import ingsis.permission.permission.persistance.repository.PermissionRepository
@@ -11,6 +16,7 @@ import ingsis.permission.permission.service.PermissionService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.util.LinkedMultiValueMap
@@ -183,4 +189,15 @@ class PermissionService
                 )
             return response.body ?: throw RuntimeException("No response from snippet-manager")
         }
+
+//        fun changeRule(configRule: ConfigRule, streamKey: String) {
+//            val message = mapOf(
+//                "name" to configRule.name,
+//                "enabled" to configRule.enabled.toString(),
+//                "value" to (configRule.value?.toString() ?: "null")
+//            )
+//
+//            // Send the message to the stream
+//            redisTemplate.opsForStream<String, String>().add(streamKey, message)
+//        }
     }

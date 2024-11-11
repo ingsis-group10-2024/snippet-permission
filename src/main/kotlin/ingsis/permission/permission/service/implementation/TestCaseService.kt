@@ -1,11 +1,19 @@
 package ingsis.permission.permission.service.implementation
 
+import ingsis.permission.SnippetPermissionApplication
 import ingsis.permission.permission.exception.SnippetNotFoundException
+import ingsis.permission.permission.model.dto.ExecutionResponse
+import ingsis.permission.permission.model.dto.SnippetRequest
 import ingsis.permission.permission.model.dto.TestCaseDTO
+import ingsis.permission.permission.model.dto.TestCaseResult
 import ingsis.permission.permission.persistance.entity.TestCaseEntity
 import ingsis.permission.permission.persistance.repository.TestCaseRepository
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import org.springframework.util.LinkedMultiValueMap
+import org.springframework.util.MultiValueMap
+import org.springframework.web.client.RestTemplate
 
 @Service
 class TestCaseService
@@ -13,8 +21,9 @@ class TestCaseService
     constructor(
         private val permissionService: PermissionService,
         private val testCaseRepository: TestCaseRepository,
+        private val restTemplate: RestTemplate,
     ) {
-        fun createTestCase(
+    fun createTestCase(
             testCaseDTO: TestCaseDTO,
             authorizationHeader: String,
         ): TestCaseEntity {
@@ -46,4 +55,47 @@ class TestCaseService
             val testCase = getTestCase(id) ?: throw RuntimeException("Test case not found")
             testCaseRepository.delete(testCase)
         }
+
+        fun executeTestCase(testCaseDTO: TestCaseDTO, authorizationHeader: String): TestCaseResult {
+            val snippet = permissionService.getSnippet(testCaseDTO.id, authorizationHeader)
+                ?: throw SnippetNotFoundException("Snippet with ${testCaseDTO.id} not found")
+
+            // Create the request for the runner microservice
+            val snippetRequest = SnippetRequest(
+                name = snippet.name,
+                content = snippet.content,
+                language = snippet.language,
+                languageVersion = snippet.languageVersion
+            )
+            println("Executing test case for snippet: $snippetRequest")
+
+            val headers: MultiValueMap<String, String> = LinkedMultiValueMap()
+            headers.add("Authorization", authorizationHeader)
+            headers.add("Content-Type", "application/json")
+
+            val response = restTemplate.postForEntity(
+                "http://snippet-runner:8080/runner/execute",
+                snippetRequest,
+                ExecutionResponse::class.java
+            )
+
+            // Check if the response is valid
+            if (response.statusCode != HttpStatus.OK || response.body == null) {
+                throw RuntimeException("Error executing snippet")
+            }
+
+            val actualOutput = response.body!!.output
+            println("Actual output: $actualOutput")
+
+            val isSuccess = actualOutput == testCaseDTO.output
+            return TestCaseResult(
+                testCaseId = testCaseDTO.id,
+                success = isSuccess,
+                actualOutput = actualOutput,
+                expectedOutput = testCaseDTO.output,
+                message = if (isSuccess) "Test passed" else "Test failed"
+            )
+
+        }
+
     }

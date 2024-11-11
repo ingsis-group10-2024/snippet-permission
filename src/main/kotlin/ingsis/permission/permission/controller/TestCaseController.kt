@@ -1,6 +1,7 @@
 package ingsis.permission.permission.controller
 
 import ingsis.permission.permission.model.dto.TestCaseDTO
+import ingsis.permission.permission.model.dto.TestCaseResult
 import ingsis.permission.permission.service.implementation.TestCaseService
 import ingsis.permission.permission.utils.toDTO
 import org.springframework.http.HttpStatus
@@ -35,6 +36,22 @@ class TestCaseController(
     fun getAllTestCases(): ResponseEntity<List<TestCaseDTO>> {
         val testCases = testCaseService.getAllTestCases()
         return ResponseEntity.ok(testCases.map { it.toDTO() })
+    }
+
+    @PostMapping("/test")
+    fun testSnippet(
+        @RequestBody testCaseDTO: TestCaseDTO,
+        @RequestHeader("Authorization") authorizationHeader: String,
+    ) : ResponseEntity<TestCaseResult> {
+        return try {
+
+            val result = testCaseService.executeTestCase(testCaseDTO, authorizationHeader)
+
+            // Returns the result of the test case
+            ResponseEntity.ok(result)
+        } catch (e: RuntimeException) {
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null)
+        }
     }
 
     @DeleteMapping("/{id}")
