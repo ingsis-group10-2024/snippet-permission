@@ -1,6 +1,6 @@
 package ingsis.permission.permission.controller
 
-import ingsis.permission.permission.model.dto.RuleDto
+import ingsis.permission.permission.model.dto.RuleDTO
 import ingsis.permission.permission.model.enums.RuleTypeEnum
 import ingsis.permission.permission.service.implementation.RuleService
 import org.springframework.http.ResponseEntity
@@ -19,10 +19,10 @@ import java.security.Principal
 class RulesController(private val ruleService: RuleService) {
     @PostMapping("/format")
     fun createOrUpdateFormatRules(
-        @RequestBody newRules: List<RuleDto>,
+        @RequestBody newRules: List<RuleDTO>,
         principal: Principal,
         @RequestHeader("Authorization") token: String,
-    ): ResponseEntity<List<RuleDto>> {
+    ): ResponseEntity<List<RuleDTO>> {
         val updatedRules =
             ruleService.createOrUpdateRules(
                 newRules = newRules,
@@ -36,10 +36,10 @@ class RulesController(private val ruleService: RuleService) {
 
     @PostMapping("/lint")
     fun createOrUpdateLintingRules(
-        @RequestBody newRules: List<RuleDto>,
+        @RequestBody newRules: List<RuleDTO>,
         principal: Principal,
         @RequestHeader("Authorization") token: String,
-    ): ResponseEntity<List<RuleDto>> {
+    ): ResponseEntity<List<RuleDTO>> {
         val updatedRules =
             ruleService.createOrUpdateRules(
                 newRules,
@@ -64,7 +64,7 @@ class RulesController(private val ruleService: RuleService) {
     fun getFormatRules(
         @RequestHeader("Authorization") authHeader: String,
         principal: Principal,
-    ): ResponseEntity<List<RuleDto>> {
+    ): ResponseEntity<List<RuleDTO>> {
         val rules = ruleService.getFormatRules(principal.name)
         return ResponseEntity.ok(rules)
     }
@@ -73,7 +73,7 @@ class RulesController(private val ruleService: RuleService) {
     fun getLintingRules(
         @RequestHeader("Authorization") authHeader: String,
         principal: Principal,
-    ): ResponseEntity<List<RuleDto>> {
+    ): ResponseEntity<List<RuleDTO>> {
         val rules = ruleService.getLintingRules(principal.name)
         return ResponseEntity.ok(rules)
     }

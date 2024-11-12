@@ -54,7 +54,6 @@ class OAuth2ResourceServerSecurityConfiguration(
                     .requestMatchers(POST, "/permission/testcases")
                     .hasAuthority("SCOPE_create:snippet")
                     .anyRequest()
-                    .requestMatchers(GET, "/")
                     .authenticated()
             }.oauth2ResourceServer {
                 it.jwt { }
