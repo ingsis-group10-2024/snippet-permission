@@ -3,6 +3,7 @@ package ingsis.permission.security
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.HttpMethod.DELETE
 import org.springframework.http.HttpMethod.GET
 import org.springframework.http.HttpMethod.POST
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -28,6 +29,18 @@ class OAuth2ResourceServerSecurityConfiguration(
                 it
                     .requestMatchers("/")
                     .permitAll()
+                    .requestMatchers(DELETE, "/rules")
+                    .hasAuthority("SCOPE_read:snippet")
+                    .requestMatchers(DELETE, "/rules/*")
+                    .hasAuthority("SCOPE_read:snippet")
+                    .requestMatchers(GET, "/rules")
+                    .hasAuthority("SCOPE_read:snippet")
+                    .requestMatchers(GET, "/rules/*")
+                    .hasAuthority("SCOPE_read:snippet")
+                    .requestMatchers(POST, "/rules")
+                    .hasAuthority("SCOPE_read:snippet")
+                    .requestMatchers(POST, "/rules/*")
+                    .hasAuthority("SCOPE_read:snippet")
                     .requestMatchers(GET, "/permission")
                     .hasAuthority("SCOPE_read:snippet")
                     .requestMatchers(GET, "/permission/*")
@@ -36,7 +49,7 @@ class OAuth2ResourceServerSecurityConfiguration(
                     .hasAuthority("SCOPE_create:snippet")
                     .requestMatchers(POST, "/permission/snippets/share/*")
                     .hasAuthority("SCOPE_create:snippet")
-                    .anyRequest()
+                    .requestMatchers(GET, "/")
                     .authenticated()
             }.oauth2ResourceServer {
                 it.jwt { }
