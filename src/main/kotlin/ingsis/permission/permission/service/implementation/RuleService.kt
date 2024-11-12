@@ -2,7 +2,7 @@ package ingsis.permission.permission.service.implementation
 
 import ingsis.permission.permission.exception.RuleNotFoundException
 import ingsis.permission.permission.exception.UnauthorizedAccessException
-import ingsis.permission.permission.model.dto.RuleDto
+import ingsis.permission.permission.model.dto.RuleDTO
 import ingsis.permission.permission.model.enums.RuleTypeEnum
 import ingsis.permission.permission.persistance.entity.Rule
 import ingsis.permission.permission.persistance.repository.RuleRepository
@@ -16,12 +16,12 @@ class RuleService
         private val ruleRepository: RuleRepository,
     ) {
         fun createOrUpdateRules(
-            newRules: List<RuleDto>,
+            newRules: List<RuleDTO>,
             url: String,
             token: String,
             ruleType: RuleTypeEnum,
             userId: String,
-        ): List<RuleDto> {
+        ): List<RuleDTO> {
             val rulesToSave =
                 newRules.map { dto ->
                     val existingRule =
@@ -48,7 +48,7 @@ class RuleService
                         )
                     }
                 }
-            return ruleRepository.saveAll(rulesToSave).map { RuleDto(it) }
+            return ruleRepository.saveAll(rulesToSave).map { RuleDTO(it) }
         }
 
         fun deleteRule(
@@ -65,13 +65,13 @@ class RuleService
             ruleRepository.delete(rule)
         }
 
-        fun getFormatRules(userId: String): List<RuleDto> {
+        fun getFormatRules(userId: String): List<RuleDTO> {
             val formatRules = ruleRepository.findByUserIdAndType(userId, RuleTypeEnum.FORMAT)
-            return formatRules.map { RuleDto(it) }
+            return formatRules.map { RuleDTO(it) }
         }
 
-        fun getLintingRules(userId: String): List<RuleDto> {
+        fun getLintingRules(userId: String): List<RuleDTO> {
             val lintingRules = ruleRepository.findByUserIdAndType(userId, RuleTypeEnum.LINT)
-            return lintingRules.map { RuleDto(it) }
+            return lintingRules.map { RuleDTO(it) }
         }
     }

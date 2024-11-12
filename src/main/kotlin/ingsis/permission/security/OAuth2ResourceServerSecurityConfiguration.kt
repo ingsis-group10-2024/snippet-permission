@@ -49,7 +49,11 @@ class OAuth2ResourceServerSecurityConfiguration(
                     .hasAuthority("SCOPE_create:snippet")
                     .requestMatchers(POST, "/permission/snippets/share/*")
                     .hasAuthority("SCOPE_create:snippet")
-                    .requestMatchers(GET, "/")
+                    .requestMatchers(GET, "/permission/testcases")
+                    .hasAuthority("SCOPE_read:snippet")
+                    .requestMatchers(POST, "/permission/testcases")
+                    .hasAuthority("SCOPE_create:snippet")
+                    .anyRequest()
                     .authenticated()
             }.oauth2ResourceServer {
                 it.jwt { }

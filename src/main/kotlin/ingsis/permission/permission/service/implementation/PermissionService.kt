@@ -90,7 +90,7 @@ class PermissionService
             return snippet
         }
 
-        private fun getSnippet(
+        fun getSnippet(
             snippetId: String,
             authorizationHeader: String,
         ): SnippetDescriptor? {
@@ -183,4 +183,15 @@ class PermissionService
                 )
             return response.body ?: throw RuntimeException("No response from snippet-manager")
         }
+
+//        fun changeRule(configRule: ConfigRule, streamKey: String) {
+//            val message = mapOf(
+//                "name" to configRule.name,
+//                "enabled" to configRule.enabled.toString(),
+//                "value" to (configRule.value?.toString() ?: "null")
+//            )
+//
+//            // Send the message to the stream
+//            redisTemplate.opsForStream<String, String>().add(streamKey, message)
+//        }
     }

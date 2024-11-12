@@ -2,7 +2,7 @@ package ingsis.permission.permission.model.dto
 
 import ingsis.permission.permission.persistance.entity.Rule
 
-data class RuleDto(
+data class RuleDTO(
     val id: String?,
     val name: String,
     val isActive: Boolean,
