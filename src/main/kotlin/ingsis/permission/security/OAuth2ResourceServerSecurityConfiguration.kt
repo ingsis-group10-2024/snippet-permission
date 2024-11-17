@@ -15,6 +15,9 @@ import org.springframework.security.oauth2.jwt.JwtDecoder
 import org.springframework.security.oauth2.jwt.JwtValidators
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.web.cors.CorsConfiguration
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource
+import org.springframework.web.filter.CorsFilter
 
 @Configuration
 @EnableWebSecurity
@@ -29,6 +32,8 @@ class OAuth2ResourceServerSecurityConfiguration(
                 it
                     .requestMatchers("/")
                     .permitAll()
+                    .requestMatchers(GET, "/permission/filetypes")
+                    .hasAuthority("SCOPE_read:snippet")
                     .requestMatchers(DELETE, "/rules")
                     .hasAuthority("SCOPE_read:snippet")
                     .requestMatchers(DELETE, "/rules/*")
@@ -57,9 +62,22 @@ class OAuth2ResourceServerSecurityConfiguration(
                     .authenticated()
             }.oauth2ResourceServer {
                 it.jwt { }
-            }.cors { it.disable() }
+            }.cors { }
             .csrf { it.disable() }
         return http.build()
+    }
+
+    @Bean
+    fun corsFilter(): CorsFilter {
+        val source = UrlBasedCorsConfigurationSource()
+        val config = CorsConfiguration()
+        config.applyPermitDefaultValues()
+        config.allowCredentials = true
+        config.allowedOrigins = listOf("http://printscript-ui:80", "http://localhost:5173")
+        config.allowedHeaders = listOf("authorization", "content-type", "*")
+        config.allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS")
+        source.registerCorsConfiguration("/**", config)
+        return CorsFilter(source)
     }
 
     @Bean
