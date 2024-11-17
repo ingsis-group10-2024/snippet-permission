@@ -2,6 +2,7 @@ package ingsis.permission.permission.controller
 
 import ingsis.permission.permission.exception.InvalidPermissionType
 import ingsis.permission.permission.model.dto.CreatePermission
+import ingsis.permission.permission.model.dto.FileType
 import ingsis.permission.permission.model.dto.PaginatedSnippetResponse
 import ingsis.permission.permission.model.dto.PermissionRequest
 import ingsis.permission.permission.model.dto.ShareSnippetRequest
@@ -42,6 +43,20 @@ class PermissionController
             } catch (e: Exception) {
                 ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error")
             }
+        }
+
+        @GetMapping("/filetypes")
+        fun getFileTypes(): ResponseEntity<List<FileType>> {
+            // List of file types, in this case it's static but it could be dynamic
+            val fileTypes =
+                listOf(
+                    FileType(language = "JavaScript", extension = ".js"),
+                    FileType(language = "TypeScript", extension = ".ts"),
+                    FileType(language = "Python", extension = ".py"),
+                    FileType(language = "Java", extension = ".java"),
+                    FileType(language = "PrintScript", extension = ".ps"),
+                )
+            return ResponseEntity.ok(fileTypes)
         }
 
         @PostMapping("/permissions")
