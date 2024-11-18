@@ -25,7 +25,7 @@ class TestSecurityConfig {
             AUTH0_TOKEN,
             Instant.now(),
             Instant.now().plusSeconds(3600),
-            mapOf<String, Any>("alg" to "none"),  // "none" porque no hay firma
+            mapOf<String, Any>("alg" to "none"), // "none" porque no hay firma
             claims,
         )
     }

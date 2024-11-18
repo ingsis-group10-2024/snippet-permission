@@ -3,7 +3,6 @@ package ingsis.permission.permission.integration
 import com.fasterxml.jackson.databind.ObjectMapper
 import config.TestSecurityConfig
 import ingsis.permission.permission.model.dto.CreatePermission
-import ingsis.permission.permission.model.dto.PermissionRequest
 import ingsis.permission.permission.model.enums.PermissionTypeEnum
 import ingsis.permission.permission.persistance.entity.Permission
 import ingsis.permission.permission.persistance.repository.PermissionRepository
@@ -26,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional
 @Import(TestSecurityConfig::class)
 @Transactional
 class PermissionIntegrationTest {
-
     @Autowired
     private lateinit var mockMvc: MockMvc
 
@@ -43,20 +41,22 @@ class PermissionIntegrationTest {
 
     @Test
     fun `test createPermission endpoint`() {
-        val createPermission = CreatePermission(
-            snippetId = "snippet123",
-            userId = "user123",
-            permissionType = "READ"
-        )
+        val createPermission =
+            CreatePermission(
+                snippetId = "snippet123",
+                userId = "user123",
+                permissionType = "READ",
+            )
         val requestBody = objectMapper.writeValueAsString(createPermission) // lo convierto en JSON
 
-        val result = mockMvc.perform(
-            MockMvcRequestBuilders.post("/permission")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestBody)
-        )
-            .andExpect(MockMvcResultMatchers.status().isCreated)
-            .andReturn()
+        val result =
+            mockMvc.perform(
+                MockMvcRequestBuilders.post("/permission")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(requestBody),
+            )
+                .andExpect(MockMvcResultMatchers.status().isCreated)
+                .andReturn()
 
         val responseBody = result.response.contentAsString
         val createdPermission = objectMapper.readValue(responseBody, Permission::class.java)
