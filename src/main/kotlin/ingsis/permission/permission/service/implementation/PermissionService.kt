@@ -2,13 +2,15 @@ package ingsis.permission.permission.service.implementation
 
 import ingsis.permission.permission.exception.InvalidPermissionType
 import ingsis.permission.permission.model.dto.CreatePermission
-import ingsis.permission.permission.model.dto.PaginatedSnippetResponse
+import ingsis.permission.permission.model.dto.PaginatedUsers
 import ingsis.permission.permission.model.dto.SnippetDescriptor
 import ingsis.permission.permission.model.enums.PermissionTypeEnum
 import ingsis.permission.permission.persistance.entity.Permission
 import ingsis.permission.permission.persistance.repository.PermissionRepository
 import ingsis.permission.permission.service.PermissionService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
@@ -90,27 +92,27 @@ class PermissionService
             return snippet
         }
 
-        fun getSnippet(
-            snippetId: String,
-            authorizationHeader: String,
-        ): SnippetDescriptor? {
-            val url = "http://snippet-manager:8080/manager/snippet/get/$snippetId"
+            fun getSnippet(
+                snippetId: String,
+                authorizationHeader: String,
+            ): SnippetDescriptor? {
+                val url = "http://snippet-manager:8080/manager/snippet/get?snippetId=$snippetId"
 
-            val headers: MultiValueMap<String, String> = LinkedMultiValueMap()
-            headers.add("Authorization", authorizationHeader)
-            headers.add("Content-Type", "application/json")
+                val headers: MultiValueMap<String, String> = LinkedMultiValueMap()
+                headers.add("Authorization", authorizationHeader)
+                headers.add("Content-Type", "application/json")
 
-            val requestEntity = HttpEntity(null, headers)
+                val requestEntity = HttpEntity(null, headers)
 
-            val response: ResponseEntity<SnippetDescriptor> =
-                restTemplate.exchange(
-                    url,
-                    HttpMethod.GET,
-                    requestEntity,
-                    SnippetDescriptor::class.java,
-                )
-            return response.body
-        }
+                val response: ResponseEntity<SnippetDescriptor> =
+                    restTemplate.exchange(
+                        url,
+                        HttpMethod.GET,
+                        requestEntity,
+                        SnippetDescriptor::class.java,
+                    )
+                return response.body
+            }
 
         override fun getOwnerBySnippetId(snippetId: String): String {
             TODO("Not yet implemented")
@@ -153,35 +155,19 @@ class PermissionService
             return repository.save(existingPermission)
         }
 
-        fun listUserSnippets(
-            userId: String,
+        fun getUserFriends(
+            name: String,
             page: Int,
             pageSize: Int,
-            authorizationHeader: String,
-        ): PaginatedSnippetResponse {
-            val headers: MultiValueMap<String, String> = LinkedMultiValueMap()
-            headers.add("Authorization", authorizationHeader)
-            headers.add("Content-Type", "application/json")
+        ): PaginatedUsers {
+            val pageable = PageRequest.of(page, pageSize)
 
-            val requestEntity = HttpEntity(null, headers)
+            val permissionsPage: Page<Permission> = repository.findByUserId(name, pageable)
 
-            val url = "http://snippet-manager:8080/manager/snippet/snippets?userId={userId}&page={page}&pageSize={pageSize}"
-            val params =
-                mapOf(
-                    "userId" to userId,
-                    "page" to page.toString(),
-                    "pageSize" to pageSize.toString(),
-                )
-
-            val response: ResponseEntity<PaginatedSnippetResponse> =
-                restTemplate.exchange(
-                    url,
-                    HttpMethod.GET,
-                    requestEntity,
-                    PaginatedSnippetResponse::class.java,
-                    params,
-                )
-            return response.body ?: throw RuntimeException("No response from snippet-manager")
+            return PaginatedUsers(
+                users = permissionsPage.content.map { it.userId },
+                total = permissionsPage.totalElements.toInt(),
+            )
         }
 
 //        fun changeRule(configRule: ConfigRule, streamKey: String) {
