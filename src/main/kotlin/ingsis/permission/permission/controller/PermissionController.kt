@@ -92,8 +92,9 @@ class PermissionController
             @RequestParam name: String = "",
             @RequestParam page: Int = 0,
             @RequestParam pageSize: Int = 10,
+            principal: Principal
         ): ResponseEntity<PaginatedUsers> {
-            val paginatedUsers = service.getUserFriends(name, page, pageSize)
+            val paginatedUsers = service.getUserFriends(principal.name, page, pageSize)
             return ResponseEntity.ok(paginatedUsers)
         }
     }

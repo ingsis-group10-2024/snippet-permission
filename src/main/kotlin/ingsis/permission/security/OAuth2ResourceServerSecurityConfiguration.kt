@@ -58,6 +58,8 @@ class OAuth2ResourceServerSecurityConfiguration(
                     .hasAuthority("SCOPE_read:snippet")
                     .requestMatchers(POST, "/permission/testcases")
                     .hasAuthority("SCOPE_create:snippet")
+                    .requestMatchers(GET, "/permission/users/*")
+                    .hasAuthority("SCOPE_read:snippet")
                     .anyRequest()
                     .authenticated()
             }.oauth2ResourceServer {

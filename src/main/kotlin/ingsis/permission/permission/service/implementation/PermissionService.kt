@@ -92,27 +92,27 @@ class PermissionService
             return snippet
         }
 
-            fun getSnippet(
-                snippetId: String,
-                authorizationHeader: String,
-            ): SnippetDescriptor? {
-                val url = "http://snippet-manager:8080/manager/snippet/get?snippetId=$snippetId"
+        fun getSnippet(
+            snippetId: String,
+            authorizationHeader: String,
+        ): SnippetDescriptor? {
+            val url = "http://snippet-manager:8080/manager/snippet/get?snippetId=$snippetId"
 
-                val headers: MultiValueMap<String, String> = LinkedMultiValueMap()
-                headers.add("Authorization", authorizationHeader)
-                headers.add("Content-Type", "application/json")
+            val headers: MultiValueMap<String, String> = LinkedMultiValueMap()
+            headers.add("Authorization", authorizationHeader)
+            headers.add("Content-Type", "application/json")
 
-                val requestEntity = HttpEntity(null, headers)
+            val requestEntity = HttpEntity(null, headers)
 
-                val response: ResponseEntity<SnippetDescriptor> =
-                    restTemplate.exchange(
-                        url,
-                        HttpMethod.GET,
-                        requestEntity,
-                        SnippetDescriptor::class.java,
-                    )
-                return response.body
-            }
+            val response: ResponseEntity<SnippetDescriptor> =
+                restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    requestEntity,
+                    SnippetDescriptor::class.java,
+                )
+            return response.body
+        }
 
         override fun getOwnerBySnippetId(snippetId: String): String {
             TODO("Not yet implemented")
@@ -159,25 +159,20 @@ class PermissionService
             name: String,
             page: Int,
             pageSize: Int,
+
         ): PaginatedUsers {
             val pageable = PageRequest.of(page, pageSize)
 
             val permissionsPage: Page<Permission> = repository.findByUserId(name, pageable)
 
+            val usersWithReadPermission = permissionsPage.content
+                .filter { permission -> permission.permissions.contains(PermissionTypeEnum.READ) ||
+                        permission.permissions.contains(PermissionTypeEnum.OWNER) }
+                .map { it.userId }
+
             return PaginatedUsers(
-                users = permissionsPage.content.map { it.userId },
+                users = usersWithReadPermission,
                 total = permissionsPage.totalElements.toInt(),
             )
         }
-
-//        fun changeRule(configRule: ConfigRule, streamKey: String) {
-//            val message = mapOf(
-//                "name" to configRule.name,
-//                "enabled" to configRule.enabled.toString(),
-//                "value" to (configRule.value?.toString() ?: "null")
-//            )
-//
-//            // Send the message to the stream
-//            redisTemplate.opsForStream<String, String>().add(streamKey, message)
-//        }
     }
