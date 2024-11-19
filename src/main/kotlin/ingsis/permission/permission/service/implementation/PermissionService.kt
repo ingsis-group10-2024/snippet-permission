@@ -159,16 +159,18 @@ class PermissionService
             name: String,
             page: Int,
             pageSize: Int,
-
         ): PaginatedUsers {
             val pageable = PageRequest.of(page, pageSize)
 
             val permissionsPage: Page<Permission> = repository.findByUserId(name, pageable)
 
-            val usersWithReadPermission = permissionsPage.content
-                .filter { permission -> permission.permissions.contains(PermissionTypeEnum.READ) ||
-                        permission.permissions.contains(PermissionTypeEnum.OWNER) }
-                .map { it.userId }
+            val usersWithReadPermission =
+                permissionsPage.content
+                    .filter { permission ->
+                        permission.permissions.contains(PermissionTypeEnum.READ) ||
+                            permission.permissions.contains(PermissionTypeEnum.OWNER)
+                    }
+                    .map { it.userId }
 
             return PaginatedUsers(
                 users = usersWithReadPermission,
