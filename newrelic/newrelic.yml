@@ -568,15 +568,15 @@ common: &default_settings
 
 development:
   <<: *default_settings
-  app_name: My Application (Development)
+  app_name: ' (Development)'
 
 test:
   <<: *default_settings
-  app_name: My Application (Test)
+  app_name: ' (Test)'
 
 production:
   <<: *default_settings
 
 staging:
   <<: *default_settings
-  app_name: My Application (Staging)
+  app_name: ' (Staging)'
