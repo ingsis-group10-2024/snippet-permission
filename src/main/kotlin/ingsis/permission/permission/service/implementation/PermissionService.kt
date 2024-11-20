@@ -1,6 +1,7 @@
 package ingsis.permission.permission.service.implementation
 
 import ingsis.permission.permission.exception.InvalidPermissionType
+import ingsis.permission.permission.exception.PermissionException
 import ingsis.permission.permission.model.dto.CreatePermission
 import ingsis.permission.permission.model.dto.PaginatedSnippetResponse
 import ingsis.permission.permission.model.dto.SnippetDescriptor
@@ -8,6 +9,8 @@ import ingsis.permission.permission.model.enums.PermissionTypeEnum
 import ingsis.permission.permission.persistance.entity.Permission
 import ingsis.permission.permission.persistance.repository.PermissionRepository
 import ingsis.permission.permission.service.PermissionService
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
@@ -23,8 +26,20 @@ class PermissionService
     constructor(
         private val repository: PermissionRepository,
         private val restTemplate: RestTemplate,
+        private val permissionRepository: PermissionRepository,
     ) : PermissionService {
+        private val logger: Logger = LoggerFactory.getLogger(PermissionService::class.java)
+
         fun createPermission(input: CreatePermission): Permission {
+            logger.info(
+                "Creating permission for User(${input.userId}): (snippetId: ${input.snippetId}, permissionType: ${input.permissionType})",
+            )
+
+            if (repository.findByUserIdAndSnippetId(input.snippetId, input.userId) != null) {
+                logger.info("User(${input.userId}) already has permission for Snippet(${input.snippetId})")
+                throw PermissionException("Permission already exists")
+            }
+
             val type = getPermissionType(input.permissionType)
             println("Permission type: $type")
             val existingPermission = findPermission(input.userId, input.snippetId)
@@ -38,7 +53,7 @@ class PermissionService
                         snippetId = input.snippetId,
                         permissions = listOf(type), // Lista de permisos
                     )
-                println("Saving permission: $permission")
+                logger.info("Saving permission: $permission. Created for User(${permission.userId}) on Snippet(${permission.snippetId})")
                 repository.save(permission)
             }
         }
@@ -48,7 +63,7 @@ class PermissionService
             snippetId: String,
         ): List<PermissionTypeEnum> {
             val permission = findPermission(userId, snippetId)
-            println("Retrieved permission for $userId and $snippetId: $permission")
+            logger.info("Retrieved permission for $userId and $snippetId: $permission")
             return permission?.permissions ?: emptyList()
         }
 
