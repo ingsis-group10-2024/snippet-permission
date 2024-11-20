@@ -10,6 +10,8 @@ import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 import java.util.UUID
 
+// Implementa un filtro que asegura que cada request HTTP tenga un identificador unico de correlacion
+// Lo usamos para rastrear las requests y monitorearlas
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @Component
 class CorrelationIdFilter : OncePerRequestFilter() {
