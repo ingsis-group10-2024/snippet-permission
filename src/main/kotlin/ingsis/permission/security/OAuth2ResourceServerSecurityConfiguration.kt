@@ -1,4 +1,4 @@
-package ingsis.permission.auth
+package ingsis.permission.security
 
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean

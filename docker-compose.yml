@@ -14,7 +14,7 @@ services:
       - postgres-data:/var/lib/postgresql/data
 
   app:
-    container_name: "permission-local"
+    container_name: "snippet-permission"
     build:
       context: .
       dockerfile: Dockerfile
