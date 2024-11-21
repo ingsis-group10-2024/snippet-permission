@@ -3,7 +3,7 @@ package ingsis.permission.permission.service.implementation
 import ingsis.permission.permission.exception.InvalidPermissionType
 import ingsis.permission.permission.exception.PermissionException
 import ingsis.permission.permission.model.dto.CreatePermission
-import ingsis.permission.permission.model.dto.PaginatedSnippetResponse
+import ingsis.permission.permission.model.dto.PaginatedUsers
 import ingsis.permission.permission.model.dto.SnippetDescriptor
 import ingsis.permission.permission.model.enums.PermissionTypeEnum
 import ingsis.permission.permission.persistance.entity.Permission
@@ -12,6 +12,8 @@ import ingsis.permission.permission.service.PermissionService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
@@ -109,7 +111,7 @@ class PermissionService
             snippetId: String,
             authorizationHeader: String,
         ): SnippetDescriptor? {
-            val url = "http://snippet-manager:8080/manager/snippet/get/$snippetId"
+            val url = "http://snippet-manager:8080/manager/snippet/get?snippetId=$snippetId"
 
             val headers: MultiValueMap<String, String> = LinkedMultiValueMap()
             headers.add("Authorization", authorizationHeader)
@@ -168,45 +170,26 @@ class PermissionService
             return repository.save(existingPermission)
         }
 
-        fun listUserSnippets(
-            userId: String,
+        fun getUserFriends(
+            name: String,
             page: Int,
             pageSize: Int,
-            authorizationHeader: String,
-        ): PaginatedSnippetResponse {
-            val headers: MultiValueMap<String, String> = LinkedMultiValueMap()
-            headers.add("Authorization", authorizationHeader)
-            headers.add("Content-Type", "application/json")
+        ): PaginatedUsers {
+            val pageable = PageRequest.of(page, pageSize)
 
-            val requestEntity = HttpEntity(null, headers)
+            val permissionsPage: Page<Permission> = repository.findByUserId(name, pageable)
 
-            val url = "http://snippet-manager:8080/manager/snippet/snippets?userId={userId}&page={page}&pageSize={pageSize}"
-            val params =
-                mapOf(
-                    "userId" to userId,
-                    "page" to page.toString(),
-                    "pageSize" to pageSize.toString(),
-                )
+            val usersWithReadPermission =
+                permissionsPage.content
+                    .filter { permission ->
+                        permission.permissions.contains(PermissionTypeEnum.READ) ||
+                            permission.permissions.contains(PermissionTypeEnum.OWNER)
+                    }
+                    .map { it.userId }
 
-            val response: ResponseEntity<PaginatedSnippetResponse> =
-                restTemplate.exchange(
-                    url,
-                    HttpMethod.GET,
-                    requestEntity,
-                    PaginatedSnippetResponse::class.java,
-                    params,
-                )
-            return response.body ?: throw RuntimeException("No response from snippet-manager")
+            return PaginatedUsers(
+                users = usersWithReadPermission,
+                total = permissionsPage.totalElements.toInt(),
+            )
         }
-
-//        fun changeRule(configRule: ConfigRule, streamKey: String) {
-//            val message = mapOf(
-//                "name" to configRule.name,
-//                "enabled" to configRule.enabled.toString(),
-//                "value" to (configRule.value?.toString() ?: "null")
-//            )
-//
-//            // Send the message to the stream
-//            redisTemplate.opsForStream<String, String>().add(streamKey, message)
-//        }
     }
