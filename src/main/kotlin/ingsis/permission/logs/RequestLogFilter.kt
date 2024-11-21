@@ -1,4 +1,4 @@
-package ingsis.permission.log
+package ingsis.permission.logs
 
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest

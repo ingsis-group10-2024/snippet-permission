@@ -28,7 +28,6 @@ class PermissionService
     constructor(
         private val repository: PermissionRepository,
         private val restTemplate: RestTemplate,
-        private val permissionRepository: PermissionRepository,
     ) : PermissionService {
         private val logger: Logger = LoggerFactory.getLogger(PermissionService::class.java)
 
