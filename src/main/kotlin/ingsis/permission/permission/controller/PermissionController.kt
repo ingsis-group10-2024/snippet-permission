@@ -3,7 +3,7 @@ package ingsis.permission.permission.controller
 import ingsis.permission.permission.exception.InvalidPermissionType
 import ingsis.permission.permission.model.dto.CreatePermission
 import ingsis.permission.permission.model.dto.FileType
-import ingsis.permission.permission.model.dto.PaginatedSnippetResponse
+import ingsis.permission.permission.model.dto.PaginatedUsers
 import ingsis.permission.permission.model.dto.PermissionRequest
 import ingsis.permission.permission.model.dto.ShareSnippetRequest
 import ingsis.permission.permission.model.dto.SnippetDescriptor
@@ -12,7 +12,6 @@ import ingsis.permission.permission.service.implementation.PermissionService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -47,7 +46,7 @@ class PermissionController
 
         @GetMapping("/filetypes")
         fun getFileTypes(): ResponseEntity<List<FileType>> {
-            // List of file types, in this case it's static but it could be dynamic
+            // List of file types, in this case it's static, but it could be dynamic
             val fileTypes =
                 listOf(
                     FileType(language = "JavaScript", extension = ".js"),
@@ -65,24 +64,6 @@ class PermissionController
         ): ResponseEntity<List<PermissionTypeEnum>> {
             val permissions = service.getPermissions(request.userId, request.snippetId)
             return ResponseEntity.ok(permissions)
-        }
-
-        @PreAuthorize("hasAuthority('SCOPE_read:snippet')")
-        @GetMapping("/snippets")
-        fun listUserSnippets(
-            principal: Principal,
-            @RequestParam page: Int,
-            @RequestParam pageSize: Int,
-            @RequestHeader("Authorization") authorizationHeader: String,
-        ): ResponseEntity<PaginatedSnippetResponse> {
-            val snippets =
-                service.listUserSnippets(
-                    userId = principal.name,
-                    page = page,
-                    pageSize = pageSize,
-                    authorizationHeader = authorizationHeader,
-                )
-            return ResponseEntity.ok(snippets)
         }
 
         @PostMapping("/snippets/share/{snippetId}")
@@ -104,5 +85,16 @@ class PermissionController
             } catch (e: Exception) {
                 ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null)
             }
+        }
+
+        @GetMapping("/users")
+        fun getUserFriends(
+            @RequestParam name: String = "",
+            @RequestParam page: Int = 0,
+            @RequestParam pageSize: Int = 10,
+            principal: Principal,
+        ): ResponseEntity<PaginatedUsers> {
+            val paginatedUsers = service.getUserFriends(principal.name, page, pageSize)
+            return ResponseEntity.ok(paginatedUsers)
         }
     }
