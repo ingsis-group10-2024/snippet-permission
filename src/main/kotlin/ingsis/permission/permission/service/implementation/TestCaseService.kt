@@ -7,6 +7,8 @@ import ingsis.permission.permission.model.dto.TestCaseDTO
 import ingsis.permission.permission.model.dto.TestCaseResult
 import ingsis.permission.permission.persistance.entity.TestCaseEntity
 import ingsis.permission.permission.persistance.repository.TestCaseRepository
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpStatus
@@ -23,15 +25,20 @@ class TestCaseService
         private val testCaseRepository: TestCaseRepository,
         private val restTemplate: RestTemplate,
     ) {
+
+    private val logger: Logger = LoggerFactory.getLogger(TestCaseService::class.java)
+
         fun createTestCase(
             testCaseDTO: TestCaseDTO,
             authorizationHeader: String,
         ): TestCaseEntity {
+            logger.info("Creating test case for snippet ${testCaseDTO.id}")
             // Check if snippet exists
+            logger.info("Checking if snippet exists...")
             val snippet =
                 permissionService.getSnippet(testCaseDTO.id, authorizationHeader)
                     ?: throw SnippetNotFoundException("Snippet with ${testCaseDTO.id} not found")
-
+            logger.info("Snippet exists")
             val testCaseEntity =
                 TestCaseEntity(
                     name = testCaseDTO.name,
@@ -39,19 +46,22 @@ class TestCaseService
                     input = testCaseDTO.input,
                     output = testCaseDTO.output,
                 )
-            println("Test case created:$testCaseEntity")
+            logger.info("Saving test case to database...")
             return testCaseRepository.save(testCaseEntity)
         }
 
         fun getTestCase(id: String): TestCaseEntity? {
+            logger.info("Getting test case with id $id")
             return testCaseRepository.findById(id).orElse(null)
         }
 
         fun getAllTestCases(): List<TestCaseEntity> {
+            logger.info("Getting all test cases...")
             return testCaseRepository.findAll()
         }
 
         fun deleteTestCase(id: String) {
+            logger.info("Deleting test case with id $id")
             val testCase = getTestCase(id) ?: throw RuntimeException("Test case not found")
             testCaseRepository.delete(testCase)
         }
@@ -60,6 +70,9 @@ class TestCaseService
             testCaseDTO: TestCaseDTO,
             authorizationHeader: String,
         ): TestCaseResult {
+            logger.info("Executing test case for snippet ${testCaseDTO.id}")
+
+            // Check if snippet exists
             val snippet =
                 permissionService.getSnippet(testCaseDTO.id, authorizationHeader)
                     ?: throw SnippetNotFoundException("Snippet with ${testCaseDTO.id} not found")
@@ -78,7 +91,7 @@ class TestCaseService
                     language = snippet.language,
                     languageVersion = snippet.languageVersion,
                 )
-            println("Executing test case: $snippetRequest")
+            logger.info("Executing snippet with request: $snippetRequest")
 
             val requestEntity = HttpEntity(snippetRequest, headers)
             val response =
@@ -90,11 +103,12 @@ class TestCaseService
 
             // Check if the response is valid
             if (response.statusCode != HttpStatus.OK || response.body == null) {
+                logger.error("Error executing snippet")
                 throw RuntimeException("Error executing snippet")
             }
 
             val actualOutput = response.body!!.output
-            println("Actual output: $actualOutput")
+            logger.info("Actual output: $actualOutput")
 
             val isSuccess = actualOutput == testCaseDTO.output
             return TestCaseResult(
