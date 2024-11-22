@@ -27,16 +27,14 @@ class PermissionService
         private val repository: PermissionRepository,
         private val restTemplate: RestTemplate,
     ) {
+        private val logger: Logger = LoggerFactory.getLogger(PermissionService::class.java)
 
-    private val logger: Logger = LoggerFactory.getLogger(PermissionService::class.java)
-
-    fun createPermission(input: CreatePermission): Permission {
-
-        logger.info("Creating permission for user ${input.userId} and snippet ${input.snippetId}...")
+        fun createPermission(input: CreatePermission): Permission {
+            logger.info("Creating permission for user ${input.userId} and snippet ${input.snippetId}...")
 
             val type = getPermissionType(input.permissionType)
 
-        logger.info("Permission type: $type")
+            logger.info("Permission type: $type")
 
             val existingPermission = findPermission(input.userId, input.snippetId)
 

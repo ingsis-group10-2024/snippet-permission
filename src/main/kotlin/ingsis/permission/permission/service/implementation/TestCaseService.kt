@@ -25,8 +25,7 @@ class TestCaseService
         private val testCaseRepository: TestCaseRepository,
         private val restTemplate: RestTemplate,
     ) {
-
-    private val logger: Logger = LoggerFactory.getLogger(TestCaseService::class.java)
+        private val logger: Logger = LoggerFactory.getLogger(TestCaseService::class.java)
 
         fun createTestCase(
             testCaseDTO: TestCaseDTO,
