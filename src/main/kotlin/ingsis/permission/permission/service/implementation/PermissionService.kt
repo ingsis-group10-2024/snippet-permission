@@ -7,7 +7,8 @@ import ingsis.permission.permission.model.dto.SnippetDescriptor
 import ingsis.permission.permission.model.enums.PermissionTypeEnum
 import ingsis.permission.permission.persistance.entity.Permission
 import ingsis.permission.permission.persistance.repository.PermissionRepository
-import ingsis.permission.permission.service.PermissionService
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
@@ -25,13 +26,20 @@ class PermissionService
     constructor(
         private val repository: PermissionRepository,
         private val restTemplate: RestTemplate,
-    ) : PermissionService {
+    ) {
+        private val logger: Logger = LoggerFactory.getLogger(PermissionService::class.java)
+
         fun createPermission(input: CreatePermission): Permission {
+            logger.info("Creating permission for user ${input.userId} and snippet ${input.snippetId}...")
+
             val type = getPermissionType(input.permissionType)
-            println("Permission type: $type")
+
+            logger.info("Permission type: $type")
+
             val existingPermission = findPermission(input.userId, input.snippetId)
 
             return if (existingPermission != null) {
+                logger.info("Permission exists. Updating permission...")
                 updatePermission(existingPermission, type)
             } else {
                 val permission =
@@ -50,36 +58,33 @@ class PermissionService
             snippetId: String,
         ): List<PermissionTypeEnum> {
             val permission = findPermission(userId, snippetId)
-            println("Retrieved permission for $userId and $snippetId: $permission")
+            logger.info("Retrieved permissions: $permission for user $userId and snippet $snippetId")
             return permission?.permissions ?: emptyList()
         }
 
-        override fun getUserPermission(
-            snippetId: String,
-            userId: String,
-        ): Permission {
-            TODO("Not yet implemented")
-        }
-
-        override fun shareSnippet(
+        fun shareSnippet(
             snippetId: String,
             userId: String,
             authorizationHeader: String,
             targetUserId: String,
         ): SnippetDescriptor {
+            logger.info("Sharing snippet $snippetId with user $targetUserId...")
             val snippet = getSnippet(snippetId, authorizationHeader) ?: throw Exception("Snippet not found")
-            println("Snippet: ${snippet.id}")
+            logger.info("Snippet found: $snippet")
 
             // Check if user has the OWNER permission
             val userPermissions = getPermissions(userId, snippetId)
-            println("$userId has permissions: $userPermissions")
+
             if (!userPermissions.contains(PermissionTypeEnum.OWNER)) {
+                logger.error("User does not have ownership of the snippet.")
                 throw InvalidPermissionType("User does not have ownership of the snippet.")
             }
 
+            logger.info("Checking if the target user already has permissions")
             // Check if the target user (the friend) already has permissions
             val existingPermission = findPermission(targetUserId, snippetId)
             if (existingPermission == null) {
+                logger.info("Target user does not have permissions. Creating READ permissions to share snippet with Id: $snippetId")
                 // If the target user does not have permissions, create READ permissions for the target user
                 createPermission(
                     CreatePermission(
@@ -96,6 +101,8 @@ class PermissionService
             snippetId: String,
             authorizationHeader: String,
         ): SnippetDescriptor? {
+            logger.info("Getting snippet with id $snippetId")
+            logger.info("Calling snippet manager")
             val url = "http://snippet-manager:8080/manager/snippet/get?snippetId=$snippetId"
 
             val headers: MultiValueMap<String, String> = LinkedMultiValueMap()
@@ -114,18 +121,6 @@ class PermissionService
             return response.body
         }
 
-        override fun getOwnerBySnippetId(snippetId: String): String {
-            TODO("Not yet implemented")
-        }
-
-        override fun addPermission(
-            snippetId: String,
-            userId: String,
-            permissionTypeEnum: PermissionTypeEnum,
-        ): Boolean {
-            TODO("Not yet implemented")
-        }
-
         private fun getPermissionType(permissionType: String): PermissionTypeEnum {
             return try {
                 PermissionTypeEnum.valueOf(permissionType)
@@ -138,7 +133,7 @@ class PermissionService
             userId: String,
             snippetId: String,
         ): Permission? {
-            println("Searching for permission with userId: $userId and snippetId: $snippetId")
+            logger.info("Finding permission for user $userId and snippet $snippetId")
             return repository.findByUserIdAndSnippetId(userId, snippetId)
         }
 
@@ -146,10 +141,12 @@ class PermissionService
             existingPermission: Permission,
             newType: PermissionTypeEnum,
         ): Permission {
+            logger.info("Updating permission: $existingPermission...")
             if (!existingPermission.permissions.contains(newType)) {
                 val updatedPermissions = existingPermission.permissions + newType
                 // copy is used to create a new instance of the object
                 val updatedPermission = existingPermission.copy(permissions = updatedPermissions)
+                logger.info("Saving permission to database: $updatedPermission")
                 return repository.save(updatedPermission)
             }
             return repository.save(existingPermission)
@@ -160,6 +157,7 @@ class PermissionService
             page: Int,
             pageSize: Int,
         ): PaginatedUsers {
+            logger.info("Getting friends of user $name")
             val pageable = PageRequest.of(page, pageSize)
 
             val permissionsPage: Page<Permission> = repository.findByUserId(name, pageable)
@@ -172,6 +170,7 @@ class PermissionService
                     }
                     .map { it.userId }
 
+            logger.info("Users with read permission: $usersWithReadPermission")
             return PaginatedUsers(
                 users = usersWithReadPermission,
                 total = permissionsPage.totalElements.toInt(),

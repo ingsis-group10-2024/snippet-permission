@@ -54,6 +54,10 @@ dependencies {
     implementation 'com.okta.spring:okta-spring-boot-starter:3.0.5'
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.security:spring-security-test")
+
+    // New Relic
+    implementation 'com.newrelic.agent.java:newrelic-api:6.5.0'
+    implementation 'com.gilt:lib-newrelic-logback_2.11:0.6.1'
 }
 
 kotlin {
