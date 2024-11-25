@@ -1,4 +1,0 @@
-package Service
-
-class TestCaseServiceTest {
-}
