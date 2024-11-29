@@ -1,14 +1,15 @@
 name: "CD - Dev ツ"
 
 on:
-  push:
-    branches:
-      - dev
+  workflow_run:
+    workflows: ["Build Project with Gradle ツ"]  # Nombre del workflow CI
+    types:
+      - completed
 
 jobs:
   build-and-publish:
     runs-on: ubuntu-latest
-
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.head_ref == 'dev' }}  # Verifica que el build project esté OK y que la rama sea dev
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v3
@@ -20,7 +21,7 @@ jobs:
         uses: docker/login-action@v1
         with:
           registry: ghcr.io
-          username: ${{ github.repository_owner }}
+          username: ${{ secrets.ACTOR }}
           password: ${{ secrets.GHCR_TOKEN }}
 
       - name: Build and Push to GitHub Packages
@@ -29,7 +30,11 @@ jobs:
         with:
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: ghcr.io/ingsis-group10-2024/snippet-permission-dev:latest
+          tags: ghcr.io/ingsis-group10-2024/snippet-manager-dev:latest
           build-args: |
             GITHUB_ACTOR=${{ github.repository_owner }}
-            GITHUB_TOKEN=${{ secrets.TOKEN }} 
+            GITHUB_TOKEN=${{ secrets.TOKEN }}
+            AUTH0_AUDIENCE=${{ secrets.AUTH0_AUDIENCE }}
+            AUTH_SERVER_URI=${{ secrets.AUTH_SERVER_URI }}
+            AUTH_CLIENT_ID=${{ secrets.AUTH_CLIENT_ID }}
+            AUTH_CLIENT_SECRET=${{ secrets.AUTH_CLIENT_SECRET }}

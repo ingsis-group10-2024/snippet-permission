@@ -18,6 +18,7 @@ import org.springframework.security.web.SecurityFilterChain
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 
+// Configura la seguridad para un servidor de recursos que utiliza tokens JWT emitidos por Auth0
 @Configuration
 @EnableWebSecurity
 class OAuth2ResourceServerSecurityConfiguration(
