@@ -18,7 +18,6 @@ import org.springframework.security.web.SecurityFilterChain
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 
-// Configura la seguridad para un servidor de recursos que utiliza tokens JWT emitidos por Auth0
 @Configuration
 @EnableWebSecurity
 class OAuth2ResourceServerSecurityConfiguration(
@@ -32,34 +31,6 @@ class OAuth2ResourceServerSecurityConfiguration(
                 it
                     .requestMatchers("/")
                     .permitAll()
-                    .requestMatchers(GET, "/permission/filetypes")
-                    .hasAuthority("SCOPE_read:snippet")
-                    .requestMatchers(DELETE, "/rules")
-                    .hasAuthority("SCOPE_read:snippet")
-                    .requestMatchers(DELETE, "/rules/*")
-                    .hasAuthority("SCOPE_read:snippet")
-                    .requestMatchers(GET, "/rules")
-                    .hasAuthority("SCOPE_read:snippet")
-                    .requestMatchers(GET, "/rules/*")
-                    .hasAuthority("SCOPE_read:snippet")
-                    .requestMatchers(POST, "/rules")
-                    .hasAuthority("SCOPE_read:snippet")
-                    .requestMatchers(POST, "/rules/*")
-                    .hasAuthority("SCOPE_read:snippet")
-                    .requestMatchers(GET, "/permission")
-                    .hasAuthority("SCOPE_read:snippet")
-                    .requestMatchers(GET, "/permission/*")
-                    .hasAuthority("SCOPE_read:snippet")
-                    .requestMatchers(POST, "/permission")
-                    .hasAuthority("SCOPE_create:snippet")
-                    .requestMatchers(POST, "/permission/snippets/share/*")
-                    .hasAuthority("SCOPE_create:snippet")
-                    .requestMatchers(GET, "/permission/testcases")
-                    .hasAuthority("SCOPE_read:snippet")
-                    .requestMatchers(POST, "/permission/testcases")
-                    .hasAuthority("SCOPE_create:snippet")
-                    .requestMatchers(GET, "/permission/users/*")
-                    .hasAuthority("SCOPE_read:snippet")
                     .anyRequest()
                     .authenticated()
             }.oauth2ResourceServer {
