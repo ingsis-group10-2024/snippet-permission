@@ -30,3 +30,24 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64
           tags: ghcr.io/ingsis-group10-2024/snippet-permission-prod:latest
+
+  deploy:
+    name: Permission prod deployment
+    runs-on: ubuntu-latest
+    needs: build-and-publish
+
+    steps:
+      - name: Update and Restart Manager Infrastructure
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DEV_URL }}
+          username: "mcchicken"
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd snippet-infra 
+            sudo su
+            docker container stop snippet-permission  
+            docker container rm snippet-permission  
+            docker-compose -f docker-compose.prod.yml pull permission  
+            docker-compose -f docker-compose.prod.yml up -d permission  
+            docker image prune -f
