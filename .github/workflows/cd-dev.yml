@@ -1,10 +1,9 @@
 name: "CD - Dev ツ"
 
 on:
-  workflow_run:
-    workflows: ["Build Project with Gradle ツ"]  # Nombre del workflow CI
-    types:
-      - completed
+  push:
+    branches:
+      - dev
 
 jobs:
   build-and-publish:
@@ -21,7 +20,7 @@ jobs:
         uses: docker/login-action@v1
         with:
           registry: ghcr.io
-          username: ${{ secrets.ACTOR }}
+          username: ${{ github.repository_owner }}
           password: ${{ secrets.GHCR_TOKEN }}
 
       - name: Build and Push to GitHub Packages
@@ -30,14 +29,7 @@ jobs:
         with:
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: ghcr.io/ingsis-group10-2024/snippet-manager-dev:latest
-          build-args: |
-            GITHUB_ACTOR=${{ github.repository_owner }}
-            GITHUB_TOKEN=${{ secrets.TOKEN }}
-            AUTH0_AUDIENCE=${{ secrets.AUTH0_AUDIENCE }}
-            AUTH_SERVER_URI=${{ secrets.AUTH_SERVER_URI }}
-            AUTH_CLIENT_ID=${{ secrets.AUTH_CLIENT_ID }}
-            AUTH_CLIENT_SECRET=${{ secrets.AUTH_CLIENT_SECRET }}
+          tags: ghcr.io/ingsis-group10-2024/snippet-permission-dev:latest
 
   deploy:
     name: Permission dev deployment
@@ -45,7 +37,7 @@ jobs:
     needs: build-and-publish
 
     steps:
-      - name: Update and Restart Manager Infrastructure
+      - name: Update and Restart Permission Infrastructure
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.DEV_URL }}
