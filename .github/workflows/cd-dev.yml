@@ -8,7 +8,7 @@ on:
 jobs:
   build-and-publish:
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' && github.head_ref == 'dev' }}   # Verifica que el build project esté OK y que la rama sea dev
+
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v3
